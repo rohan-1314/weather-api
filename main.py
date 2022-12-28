@@ -3,14 +3,17 @@ import pandas as pd
 
 app = Flask(__name__)
 
+stations = pd.read_csv('data_small_weather/stations.txt', skiprows=17)
+station = stations[['STAID', 'STANAME                                 ']]
+
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    return render_template('home.html', data=station.to_html())
 
 
 @app.route('/api/v1/<station>/<date>')
-def weather_api(station, date):
+def one_date_temp_data(station, date):
     filepath = 'data_small_weather/TG_STAID' + str(station).zfill(6) + '.txt'
     df = pd.read_csv(filepath, skiprows=20, parse_dates=['    DATE'])
     temperature = df.loc[df['    DATE'] == date]['   TG'].squeeze() / 10
@@ -20,6 +23,14 @@ def weather_api(station, date):
         'temperature': temperature
     }
     return content
+
+
+@app.route('/api/v1/<station>')
+def all_data(station):
+    filepath = 'data_small_weather/TG_STAID' + str(station).zfill(6) + '.txt'
+    df = pd.read_csv(filepath, skiprows=20, parse_dates=['    DATE'])
+    result = df.to_dict(orient='records')
+    return result
 
 
 if __name__ == '__main__':
