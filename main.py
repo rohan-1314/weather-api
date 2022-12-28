@@ -33,5 +33,14 @@ def all_data(station):
     return result
 
 
+@app.route('/api/v1/yearly/<station>/<year>')
+def data_one_year(station, year):
+    filepath = 'data_small_weather/TG_STAID' + str(station).zfill(6) + '.txt'
+    df = pd.read_csv(filepath, skiprows=20)
+    df['    DATE'] = df['    DATE'].astype(str)
+    result = df[df['    DATE'].str.startswith(str(year))].to_dict(orient='record')
+    return result
+
+
 if __name__ == '__main__':
     app.run(debug=True)
